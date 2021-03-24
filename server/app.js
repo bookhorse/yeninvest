@@ -4,7 +4,7 @@ import path from "path";
 import routes from "./routes.js";
 
 const app = express();
-const PORT = 3000;
+const PORT = 3000 || process.env.PORT;
 const reactRoot = path.join(process.cwd(), "public", "index.html");
 
 app.use(bodyParser.json());
