@@ -3,6 +3,10 @@ import PropTypes from "prop-types";
 
 const EmptySide = () => (<div>Loading...</div>);
 
+const BIGWALL = 100000;
+const SMALLWALL = 50000;
+const LOWVOL = 1000;
+
 const BookSide = ({data}) => {
   const total = Number(data 
     ? data.reduce((acc, cur) => acc + cur.fiat, 0)
@@ -10,27 +14,34 @@ const BookSide = ({data}) => {
 
   let acc = 0;
 
-  const chooseClass = el => el.volume > 100000
+  const chooseClass = el => el.volume > BIGWALL
     ? "bigwall"
-    : el.volume > 50000
+    : el.volume > SMALLWALL
       ? "wall"
       : null;
 
   const orders = data
     ? data.map(el => {
-      const price = Number(el.price).toFixed(8);
+      const price = Number(el.price).toFixed(9);
       const fiat = Number(el.fiat).toFixed(2);
       acc += el.fiat;
       const accfiat = Number(acc).toFixed(2);
-      return <div key={el.price} className={chooseClass(el)}>
-        {price} - {fiat} &#8381; - {accfiat} &#8381;
-      </div>;
+      const lowVol = el.volume < LOWVOL;
+      const curSign = "\u20BD";
+
+      const text = `${price} - ${fiat} ${curSign} - ${accfiat} ${curSign}`;
+
+      return lowVol
+        ? null
+        : <div key={el.price} className={chooseClass(el)}>
+          {text}
+        </div>;
     })
     : null;
 
   return data 
     ? (
-      <div>
+      <div className="side">
         <div className="header">Total: {total} &#8381;</div>
         <div className="orders">{orders}</div>
       </div>

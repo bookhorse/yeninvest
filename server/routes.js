@@ -15,18 +15,24 @@ function setup(app) {
     }
   };
 
+  const memeFilter = 0.001;
+
   const processOrders = (orders, exrate) => {
+    //console.log(orders);
     for (let i = 0; i < orders.length; ++i) {
       orders[i].fiat = orders[i].volume * orders[i].price * exrate;
     }
+
+    //filter out meme prices
+    return orders.filter(ord => ord.price < memeFilter);
   };
 
   app.get("/api/orderbook", async function (req, res) {
     try {
       const book = await getCached("orderbook", 30, api.getOrderBook);
       const exrate = await getCached("btcrub", 10, api.getBtcCost);
-      processOrders(book.buyLevels, exrate);
-      processOrders(book.sellLevels, exrate);
+      book.buyLevels = processOrders(book.buyLevels, exrate);
+      book.sellLevels = processOrders(book.sellLevels, exrate);
 
       res.status(200).send(book);
 
